@@ -60,15 +60,17 @@ public class ShopCartController extends CodeMessage {
 
     @ApiOperation("加入购物车")
     @RequestMapping(value = "/addMemberShopCart", method = RequestMethod.POST)
-    public String addMemberShopCart(String shopCart,Integer memberId,Integer productId,Integer productAmount) {
+    public String addMemberShopCart(String shopCart,Integer memberId,Integer productId,Integer productAmount,String brede_context,Integer custom_id) {
 
-        if (memberId == null || productId == null) {
+        if (memberId == null || productId == null || custom_id == null) {
             return Message.mesFalse(code_400, message_400);
         }
         PageData pageData = new PageData();
         pageData.put("memberId", memberId);
         pageData.put("productId", productId);
         pageData.put("productAmount", productAmount);
+        pageData.put("brede_context", brede_context);
+        pageData.put("custom_id", custom_id);
         pageData.put("create_time", DateUtil.getTime());
         Integer res = shopCartService.addMemberShopCart(pageData);
 

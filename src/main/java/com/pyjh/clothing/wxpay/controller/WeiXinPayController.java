@@ -70,7 +70,8 @@ public class WeiXinPayController {
                                                 Integer franchiseeId,
                                                 @RequestParam(value = "shopCartId", required = false) String shopCartId,
                                                 @RequestParam(value = "skuId", required = false) String skuId,
-                                                @RequestParam(value = "brede_context", required = false) String brede_context) throws Exception {
+                                                @RequestParam(value = "brede_context", required = false) String brede_context,
+                                                @RequestParam(value = "custom_id", required = false) Integer custom_id) throws Exception {
         response.setHeader("Access-Control-Allow-Origin", "*");
         System.out.println(",openid:" + openid +
                 ",\nmember_id:" + member_id + ",messages:" + messages +
@@ -82,7 +83,8 @@ public class WeiXinPayController {
         if (CommonUtil.paramIsNull(openid) || CommonUtil.paramIsNull(member_id)
                 || CommonUtil.paramIsNull(address_id) || CommonUtil.paramIsNull(pay_way)
                 || CommonUtil.paramIsNull(BuyWay) || CommonUtil.paramIsNull(product_idStr)
-                || CommonUtil.paramIsNull(amountStr)) {
+                || CommonUtil.paramIsNull(amountStr)
+                || CommonUtil.paramIsNull(custom_id)) {
             model.put("msg", "参数为空");
             model.put("status", "402");
             return model;
@@ -91,7 +93,7 @@ public class WeiXinPayController {
             // 用“，”分割
             String[] product_ids = product_idStr.split(",");
             String[] amounts = amountStr.split(",");
-            String[] brede_contexts = brede_context.split(",");
+            String[] liuyans = brede_context.split(",");
             Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
             String out_trade_no = "";
 //            try {
@@ -172,6 +174,7 @@ public class WeiXinPayController {
             pOrder.put("orderCode", out_trade_no);
             pOrder.put("orderNote", messages);
             pOrder.put("create_time",DateUtil.getTime());
+            pOrder.put("custom_id", custom_id);
             orderService.addOrder(pOrder);
             Integer orderId = orderService.getMaxOrderId();
             PageData psku = new PageData();
@@ -192,7 +195,7 @@ public class WeiXinPayController {
                 pDetail.put("price", prices[i]);
                 pDetail.put("create_time", DateUtil.getTime());
                 pDetail.put("amount", Integer.parseInt(amounts[i]));
-                pDetail.put("brede_context",brede_contexts[i]);
+                pDetail.put("brede_context",liuyans[i]);
                 pCoupons.put("status",3);
                 // pDetail.put("productIcon", Integer.parseInt(productIcon[i]));
               int row= orderService.addOrderDetail(pDetail);

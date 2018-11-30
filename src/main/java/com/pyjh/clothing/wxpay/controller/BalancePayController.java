@@ -64,14 +64,17 @@ public class BalancePayController {
                              @RequestParam(value = "shopCartId", required = false) String shopCartId,
                              @RequestParam(value = "ec_id", required = false) Integer ec_id,
                              @RequestParam(value = "skuId", required = false) String skuId,
-                             @RequestParam(value = "brede_context", required = false)String brede_context) {
+                             @RequestParam(value = "brede_context", required = false) String brede_context,
+                             @RequestParam(value = "custom_id", required = false) Integer custom_id) {
         response.setHeader("Access-Control-Allow-Origin", "*");
         if (CommonUtil.paramIsNull(member_id)
                 || CommonUtil.paramIsNull(address_id)
                 || CommonUtil.paramIsNull(pay_way)
                 || CommonUtil.paramIsNull(order_note)
                 || CommonUtil.paramIsNull(product_id)
-                || CommonUtil.paramIsNull(amount)) {
+                || CommonUtil.paramIsNull(amount)
+                || CommonUtil.paramIsNull(custom_id)
+        		) {
             return ResponseEnum.ARGUMENT_IS_NULL.toString();
         }
         Map<String, Object> data = new HashMap<String, Object>();
@@ -79,7 +82,7 @@ public class BalancePayController {
         String[] product_ids = product_id.split(",");
         String[] sku = skuId.split(",");
         String[] amounts = amount.split(",");
-        String[] brede_contexts = brede_context.split(",");
+        String[] liuyans = brede_context.split(",");
         String out_trade_no = "";
         try {
             // 支付账户
@@ -157,6 +160,7 @@ public class BalancePayController {
             pOrder.put("create_time", CommonUtil.getDateTimeString(new Date()));
             pOrder.put("order_code", out_trade_no);
             pOrder.put("order_note", order_note);
+            pOrder.put("custom_id", custom_id);//量体信息id
             orderService.addOrder(pOrder);
             // 订单详情
             for (int i = 0; i < amounts.length; i++) {
@@ -167,7 +171,7 @@ public class BalancePayController {
                 pDetail.put("product_name", names[i]);
                 pDetail.put("price", prices[i]);
                 pDetail.put("amount", Integer.parseInt(amounts[i]));
-                pDetail.put("brede_context", brede_contexts[i]);
+                pDetail.put("brede_context",liuyans[i]);
 
                 int row = product_order_detailService.insertOrderDetail(pDetail);
 
@@ -280,8 +284,12 @@ public class BalancePayController {
                     } catch (Exception e) {
                         // logger.warn(e);
                     }
+                    String brede_context="无绣字";
+                    if(CommonUtil.paramIsNull(pDetails.getString("brede_context"))) {
+                    	brede_context="绣字内容："+pDetails.getString("brede_context");
+                    }
                     msg = msg + Oneproduct.getString("product_name") + "　　商品单价：" + Oneproduct.getDouble("product_price")
-                            + "元　　购买数量：" + pDetails.getInteger("amount") + "\n";
+                            + "元　　购买数量：" + pDetails.getInteger("amount") +"	 "+brede_context+ "\n";
                 }
                     PageData pAddress = new PageData();
                     pAddress.put("address_id", address_id);
